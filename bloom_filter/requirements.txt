@@ -1,2 +1,0 @@
-bitarray==2.8.1
-murmurhash3==2.3.5
