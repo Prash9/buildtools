@@ -6,8 +6,11 @@ import (
     "os"
     "bufio"
     "strings"
+    "unicode/utf8"
 )
 
+// Command to run
+//  ./ccwc -c -l -w test.txt
 func main() {
     var filepath string
 
@@ -16,6 +19,7 @@ func main() {
     size_flag := flag.Bool("c", false, "Get byte size of the file")
     noOfLines := flag.Bool("l", false, "Get number of lines in the file")
     noOfWords := flag.Bool("w", false, "Get number of words in the file")
+    noOfChars := flag.Bool("m", false, "Get number of charcters in the file")
     flag.Parse()
     
     filepath = os.Args[len(os.Args)-1]
@@ -51,8 +55,31 @@ func main() {
         fileObj.Seek(0,0)
     }
 
+    if *noOfChars {
+        fmt.Println("Number of charcters in file:", getNoOfChars(fileObj))
+        // reset file obj pointer
+        fileObj.Seek(0,0)
+    }
+
 }
 
+
+func getNoOfChars(fileObj *os.File) int {
+    
+    charCount := 0
+    scanner := bufio.NewScanner(fileObj)
+    for scanner.Scan() {
+        line := scanner.Text()
+        charCount += utf8.RuneCountInString(line) + 1 // add new line charcter
+    }
+
+    if err := scanner.Err(); err != nil {
+        fmt.Println("Error scanning file: ", err)
+        os.Exit(1)
+    }
+    
+    return charCount 
+}
 
 func getFileStat(filepath string) os.FileInfo {
     filestat, err := os.Stat(filepath)
